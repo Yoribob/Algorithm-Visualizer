@@ -1,0 +1,15 @@
+{
+  "limits": {
+    "range_min": 2,
+    "range_max": 99,
+    "size_min": 5,
+    "size_max": 20,
+    "seed_min": 1,
+    "seed_max": 99
+  },
+  "defaults": {
+    "range": 50,
+    "size": 20,
+    "seed": 1
+  }
+}
