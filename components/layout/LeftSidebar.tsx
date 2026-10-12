@@ -26,10 +26,11 @@ export function LeftSidebar({ algorithms, selected, onSelect }: SidebarProps) {
   };
 
   return (
-    <div className="flex flex-col w-1/6 h-screen bg-gray-400">
-      <h1>Algorithms</h1>
+    <div className="px-5 pt-5 flex shrink-0 gap-3 flex-col w-1/10 min-w-48 h-screen bg-side">
+      <h1 className="text-2xl font-bold w-full flex justify-center">Algorithms</h1>
       <input
-        placeholder="Search for algorithm..."
+        className="bg-main rounded-md h-9 p-3 border border-black/15 focus:bg-white focus:ring-2 focus:outline-none"
+        placeholder="Search"
         value={search}
         onChange={(event) => setSearch(event.target.value)}
       />
@@ -46,7 +47,17 @@ export function LeftSidebar({ algorithms, selected, onSelect }: SidebarProps) {
               role="button"
               tabIndex={0}
               onClick={() => handleCategoryClick(category)}
-              className="cursor-pointer select-none"
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleCategoryClick(category);
+                }
+              }}
+              className={`cursor-pointer select-none rounded-md mt-1.25 px-2 h-8 flex items-center text-lg font-medium ${
+                expandedCategory === category
+                  ? "bg-main text-font"
+                  : "hover:bg-muted"
+              }`}
             >
               <p>{category}</p>
             </div>
@@ -56,7 +67,11 @@ export function LeftSidebar({ algorithms, selected, onSelect }: SidebarProps) {
                 {categoryAlgorithms.map((algorithm) => (
                   <li
                     key={algorithm.slug}
-                    className="cursor-pointer select-none"
+                    className={`cursor-pointer select-none rounded-md mt-1.75 px-2 ml-2.5 h-8 flex items-center ${
+                      selected?.slug === algorithm.slug
+                        ? "bg-bar text-white font-medium"
+                        : "hover:bg-muted"
+                    }`}
                     onClick={() => onSelect(algorithm)}
                   >
                     {algorithm.name}

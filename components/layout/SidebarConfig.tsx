@@ -93,47 +93,67 @@ export function SidebarConfig({
   );
 
   return (
-    <div className="mt-auto">
-      <h1>Config</h1>
-      <div>
-        <span>Size</span>
-        <input
-          type="number"
-          min={limits.size_min}
-          max={limits.size_max}
-          value={size.draft}
-          onChange={size.handleChange}
-          onBlur={size.handleBlur}
-          onKeyDown={size.handleKeyDown}
-          className="w-auto px-2 py-1 border border-gray-700 bg-gray-300"
-        />
+    <section className="mt-auto space-y-4 rounded-lg border border-black/10 bg-main p-4">
+      <h3 className="text-base font-bold">Array settings</h3>
+      <div className="space-y-3">
+        <label htmlFor="array-size" className="block">
+          <span className="mb-1.5 flex items-center justify-between gap-2 text-sm font-medium">
+            <span>Size</span>
+            <span className="text-xs font-normal text-black/50">
+              {limits.size_min}–{limits.size_max}
+            </span>
+          </span>
+          <input
+            id="array-size"
+            type="number"
+            min={limits.size_min}
+            max={limits.size_max}
+            value={size.draft}
+            onChange={size.handleChange}
+            onBlur={size.handleBlur}
+            onKeyDown={size.handleKeyDown}
+            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm tabular-nums outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+          />
+        </label>
+        <label htmlFor="array-range" className="block">
+          <span className="mb-1.5 flex items-center justify-between gap-2 text-sm font-medium">
+            <span>Range</span>
+            <span className="text-xs font-normal text-black/50">
+              {limits.range_min}–{limits.range_max}
+            </span>
+          </span>
+          <input
+            id="array-range"
+            type="number"
+            min={limits.range_min}
+            max={limits.range_max}
+            value={range.draft}
+            onChange={range.handleChange}
+            onBlur={range.handleBlur}
+            onKeyDown={range.handleKeyDown}
+            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm tabular-nums outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+          />
+        </label>
+        <label htmlFor="array-seed" className="block">
+          <span className="mb-1.5 flex items-center justify-between gap-2 text-sm font-medium">
+            <span>Seed</span>
+            <span className="text-xs font-normal text-black/50">
+              {limits.seed_min}–{limits.seed_max}
+            </span>
+          </span>
+          <input
+            id="array-seed"
+            type="number"
+            min={limits.seed_min}
+            max={limits.seed_max}
+            value={seed.draft}
+            onChange={seed.handleChange}
+            onBlur={seed.handleBlur}
+            onKeyDown={seed.handleKeyDown}
+            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm tabular-nums outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+          />
+        </label>
       </div>
-      <div>
-        <span>Range</span>
-        <input
-          type="number"
-          min={limits.range_min}
-          max={limits.range_max}
-          value={range.draft}
-          onChange={range.handleChange}
-          onBlur={range.handleBlur}
-          onKeyDown={range.handleKeyDown}
-          className="w-auto px-2 py-1 border border-gray-700 bg-gray-300"
-        />
-      </div>
-      <div>
-        <span>Seed</span>
-        <input
-          type="number"
-          min={limits.seed_min}
-          max={limits.seed_max}
-          value={seed.draft}
-          onChange={seed.handleChange}
-          onBlur={seed.handleBlur}
-          onKeyDown={seed.handleKeyDown}
-          className="w-auto px-2 py-1 border border-gray-700 bg-gray-300"
-        />
-      </div>
-    </div>
+    </section>
   );
 }

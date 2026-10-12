@@ -49,13 +49,14 @@ function AlgorithmPanel({
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-end">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-end mt-20">
         <SortVisualizer
           currentStep={currentStep}
           ranks={ranks}
           playbackSpeed={playbackSpeed}
         />
       </div>
+      <hr className="my-8 h-px w-full self-center border-0 bg-bar"/>
       <StatusBar steps={steps} currentStepIndex={step} />
       <Controls
         onNext={goNext}
@@ -67,6 +68,8 @@ function AlgorithmPanel({
         disableNext={step === steps.length - 1}
         disablePrev={step === 0}
         isAuto={isAuto}
+        steps={steps}
+        currentStepIndex={step}
       />
     </div>
   );

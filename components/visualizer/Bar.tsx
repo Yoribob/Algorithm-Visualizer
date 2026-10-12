@@ -23,16 +23,16 @@ export function Bar({
       ? "rgb(45, 156, 130)"
       : isHighLighted
         ? "rgb(230, 126, 57)"
-        : "rgb(90, 103, 130)";
+        : "var(--bar)";
   const style: CSSProperties & { "--playback-delay": string } = {
-    height: height * 20,
+    height: height * 20 + 5,
     backgroundColor,
     "--playback-delay": `${150 - playbackSpeed}ms`,
   };
 
   return (
     <div
-      className="flex w-[50px] items-center justify-center transition-[height] ease-in-out delay-[var(--playback-delay)]"
+      className="rounded-t-lg flex w-[65px] items-center justify-center transition-[height] ease-in-out delay-[var(--playback-delay)] text-white font-semibold"
       style={style}
     >
       <span className="text-xl">{label}</span>

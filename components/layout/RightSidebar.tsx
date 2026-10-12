@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Algorithm } from "@/lib/types/algorithm";
+import type { Algorithm } from "@/lib/types/algorithm";
 import { SidebarConfig } from "./SidebarConfig";
 interface SidebarProps {
   algorithm: Algorithm | null;
@@ -11,18 +10,6 @@ interface SidebarProps {
   setSeedValue: (seedValue: number) => void;
 }
 
-function TimeComplexityList({ algorithm }: { algorithm: Algorithm | null }) {
-  if (!algorithm?.timeComplexity) return null;
-
-  return (
-    <>
-      <span>Worst case: {algorithm.timeComplexity[0]}</span>
-      <span>Average case: {algorithm.timeComplexity[1]}</span>
-      <span>Best case: {algorithm.timeComplexity[2]}</span>
-    </>
-  );
-}
-
 export function RightSidebar({
   algorithm,
   sizeValue,
@@ -32,26 +19,59 @@ export function RightSidebar({
   seedValue,
   setSeedValue,
 }: SidebarProps) {
-  const [isTimeOpen, setIsTimeOpen] = useState(false);
-
   return (
-    <div className="flex w-1/6 flex-shrink-0 flex-col bg-gray-400 p-4">
+    <aside
+      aria-label="Algorithm details"
+      className="flex w-72 shrink-0 flex-col gap-6 overflow-y-auto border-l border-black/10 bg-side px-5 py-6 text-font"
+    >
       {algorithm ? (
         <>
-          <h1 className="text-xl font-bold">{algorithm?.name}</h1>
-          <span>{algorithm?.description}</span>
-          <span>Difficulty: {algorithm?.difficulty}</span>
+          <section className="space-y-3">
+            <h2 className="break-words text-2xl font-bold leading-tight">
+              {algorithm.name}
+            </h2>
+            <p className="text-sm leading-6 text-black/70">
+              {algorithm.description}
+            </p>
+            <div className="flex items-center justify-between gap-3 border-y border-black/10 py-3 text-sm">
+              <span className="text-black/60">Difficulty</span>
+              <span className="rounded-full bg-main px-2.5 py-1 font-semibold">
+                {algorithm.difficulty}
+              </span>
+            </div>
+          </section>
 
-          <div
-            className="mt-4 font-semibold cursor-pointer"
-            onClick={() => setIsTimeOpen(!isTimeOpen)}
-          >
-            Time Complexity
-          </div>
-
-          {isTimeOpen && <TimeComplexityList algorithm={algorithm} />}
-
-          <div>Space Complexity: {algorithm?.spaceComplexity}</div>
+          <section className="space-y-3">
+            <h3 className="text-md font-bold uppercase tracking-wider">
+              Complexity
+            </h3>
+            <dl className="space-y-2.5 text-sm">
+              <div className="flex items-start justify-between gap-3">
+                <dt className="shrink-0 text-black/60">Worst case</dt>
+                <dd className="break-all text-right font-mono">
+                  {algorithm.timeComplexity[0]}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="shrink-0 text-black/60">Average case</dt>
+                <dd className="break-all text-right font-mono">
+                  {algorithm.timeComplexity[1]}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="shrink-0 text-black/60">Best case</dt>
+                <dd className="break-all text-right font-mono">
+                  {algorithm.timeComplexity[2]}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-3 border-t border-black/10 pt-2.5">
+                <dt className="shrink-0 text-black/60">Space</dt>
+                <dd className="break-all text-right font-mono font-semibold">
+                  {algorithm.spaceComplexity}
+                </dd>
+              </div>
+            </dl>
+          </section>
 
           <SidebarConfig
             sizeValue={sizeValue}
@@ -63,8 +83,10 @@ export function RightSidebar({
           />
         </>
       ) : (
-        <p>Select an algorithm</p>
+        <p className="text-sm leading-6 text-black/60">
+          Select an algorithm
+        </p>
       )}
-    </div>
+    </aside>
   );
 }
