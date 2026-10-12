@@ -1,7 +1,10 @@
 import { limits } from "@/lib/config/config.json";
 import { useEffect, useState } from "react";
+import type { SortOrder } from "@/lib/utils/comparators";
 
 interface SidebarConfigProp {
+  sortOrder: SortOrder;
+  setSortOrder: (sortOrder: SortOrder) => void;
   sizeValue: number;
   rangeValue: number;
   seedValue: number;
@@ -66,6 +69,8 @@ function useClampedNumberInput(
 }
 
 export function SidebarConfig({
+  sortOrder,
+  setSortOrder,
   sizeValue,
   setSizeValue,
   rangeValue,
@@ -96,6 +101,23 @@ export function SidebarConfig({
     <section className="mt-auto space-y-4 rounded-lg border border-black/10 bg-main p-4">
       <h3 className="text-base font-bold">Array settings</h3>
       <div className="space-y-3">
+        <label htmlFor="sort-order" className="block">
+          <span className="mb-1.5 block text-sm font-medium">Sort order</span>
+          <select
+            id="sort-order"
+            value={sortOrder}
+            onChange={(event) => {
+              const nextOrder = event.target.value;
+              if (nextOrder === "ascending" || nextOrder === "descending") {
+                setSortOrder(nextOrder);
+              }
+            }}
+            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+          >
+            <option value="ascending">Ascending</option>
+            <option value="descending">Descending</option>
+          </select>
+        </label>
         <label htmlFor="array-size" className="block">
           <span className="mb-1.5 flex items-center justify-between gap-2 text-sm font-medium">
             <span>Size</span>

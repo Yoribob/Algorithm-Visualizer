@@ -7,6 +7,7 @@ import { SortVisualizer } from "../visualizer/SortVisualizer";
 import { Controls } from "../visualizer/Controls";
 import { StatusBar } from "./StatusBar";
 import * as comparators from "@/lib/utils/comparators";
+import type { SortOrder } from "@/lib/utils/comparators";
 import { getRanks } from "@/lib/utils/ranks";
 import { generateArrayNumber } from "@/lib/utils/generator";
 import { useStepPlayer } from "@/hooks/useStepPlayer";
@@ -17,6 +18,9 @@ import * as config from "@/lib/config/config.json";
 
 interface AlgorithmPanelProps {
   algorithm: Algorithm;
+  sortOrder: SortOrder;
+  showLogs: boolean;
+  onToggleLogs: () => void;
   sizeValue: number;
   rangeValue: number;
   seedValue: number;
@@ -24,12 +28,19 @@ interface AlgorithmPanelProps {
 
 function AlgorithmPanel({
   algorithm,
+  sortOrder,
+  showLogs,
+  onToggleLogs,
   sizeValue,
   rangeValue,
   seedValue,
 }: AlgorithmPanelProps) {
   const array = generateArrayNumber(sizeValue, rangeValue, seedValue);
-  const steps: Step[] = algorithm.run(array, comparators.ascendingNumber).steps;
+  const compareFn =
+    sortOrder === "ascending"
+      ? comparators.ascendingNumber
+      : comparators.descendingNumber;
+  const steps: Step[] = algorithm.run(array, compareFn).steps;
   const ranks = getRanks(array, comparators.ascendingNumber);
   const {
     step,
@@ -57,7 +68,12 @@ function AlgorithmPanel({
         />
       </div>
       <hr className="my-8 h-px w-full self-center border-0 bg-bar"/>
-      <StatusBar steps={steps} currentStepIndex={step} />
+      <StatusBar
+        steps={steps}
+        currentStepIndex={step}
+        showLogs={showLogs}
+        onToggleLogs={onToggleLogs}
+      />
       <Controls
         onNext={goNext}
         onPrev={goPrev}
@@ -82,6 +98,8 @@ export function AppLayout() {
   const [sizeValue, setSizeValue] = useState(config.defaults.size);
   const [rangeValue, setRangeValue] = useState(config.defaults.range);
   const [seedValue, setSeedValue] = useState(config.defaults.seed);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("ascending");
+  const [showLogs, setShowLogs] = useState(true);
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -93,8 +111,11 @@ export function AppLayout() {
       {currentAlgorithm ? (
         <div className="flex min-h-0 flex-1 justify-center">
           <AlgorithmPanel
-            key={`${currentAlgorithm.slug}-${sizeValue}-${rangeValue}-${seedValue}`}
+            key={`${currentAlgorithm.slug}-${sortOrder}-${sizeValue}-${rangeValue}-${seedValue}`}
             algorithm={currentAlgorithm}
+            sortOrder={sortOrder}
+            showLogs={showLogs}
+            onToggleLogs={() => setShowLogs((visible) => !visible)}
             sizeValue={sizeValue}
             rangeValue={rangeValue}
             seedValue={seedValue}
@@ -107,6 +128,8 @@ export function AppLayout() {
       )}
       <RightSidebar
         algorithm={currentAlgorithm}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
         sizeValue={sizeValue}
         setSizeValue={setSizeValue}
         rangeValue={rangeValue}

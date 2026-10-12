@@ -1,7 +1,10 @@
 import type { Algorithm } from "@/lib/types/algorithm";
+import type { SortOrder } from "@/lib/utils/comparators";
 import { SidebarConfig } from "./SidebarConfig";
 interface SidebarProps {
   algorithm: Algorithm | null;
+  sortOrder: SortOrder;
+  setSortOrder: (sortOrder: SortOrder) => void;
   sizeValue: number;
   rangeValue: number;
   seedValue: number;
@@ -12,6 +15,8 @@ interface SidebarProps {
 
 export function RightSidebar({
   algorithm,
+  sortOrder,
+  setSortOrder,
   sizeValue,
   setSizeValue,
   rangeValue,
@@ -74,6 +79,8 @@ export function RightSidebar({
           </section>
 
           <SidebarConfig
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
             sizeValue={sizeValue}
             setSizeValue={setSizeValue}
             rangeValue={rangeValue}

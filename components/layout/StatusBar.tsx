@@ -1,11 +1,15 @@
 import type { Step } from "@/lib/types/steps";
-import { useState } from "react";
 interface StatusBarProps {
   steps: Step[];
   currentStepIndex: number;
+  showLogs: boolean;
+  onToggleLogs: () => void;
 }
 
-function sliceArray({ steps, currentStepIndex }: StatusBarProps) {
+function sliceArray({
+  steps,
+  currentStepIndex,
+}: Pick<StatusBarProps, "steps" | "currentStepIndex">) {
   const slicedArray = steps.slice(0, currentStepIndex + 1).reverse();
   return slicedArray;
 }
@@ -30,9 +34,12 @@ function getMessage(step: Step) {
   return message;
 }
 
-export function StatusBar({ steps, currentStepIndex }: StatusBarProps) {
-  const [showLogs, setShowLogs] = useState(true);
-
+export function StatusBar({
+  steps,
+  currentStepIndex,
+  showLogs,
+  onToggleLogs,
+}: StatusBarProps) {
   if (!steps.length) {
     return null;
   }
@@ -45,7 +52,7 @@ export function StatusBar({ steps, currentStepIndex }: StatusBarProps) {
         <span className="text-4xl">Status log</span>
         <button
           aria-pressed={showLogs}
-          onClick={() => setShowLogs((prev) => !prev)}
+          onClick={onToggleLogs}
           className={`absolute right-0 mr-5 cursor-pointer rounded-full border-2 border-bar px-3 py-0.5 text-sm font-semibold transition duration-150 ease-out active:scale-95 ${
             showLogs ? "bg-bar text-white" : "text-bar hover:bg-bar/10"
           }`}
