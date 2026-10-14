@@ -1,10 +1,13 @@
 import type { Algorithm } from "@/lib/types/algorithm";
 import type { SortOrder } from "@/lib/utils/comparators";
+import type { ArrayPreset } from "@/lib/utils/generator";
 import { SidebarConfig } from "./SidebarConfig";
 interface SidebarProps {
   algorithm: Algorithm | null;
   sortOrder: SortOrder;
   setSortOrder: (sortOrder: SortOrder) => void;
+  arrayPreset: ArrayPreset;
+  setArrayPreset: (preset: ArrayPreset) => void;
   sizeValue: number;
   rangeValue: number;
   seedValue: number;
@@ -17,6 +20,8 @@ export function RightSidebar({
   algorithm,
   sortOrder,
   setSortOrder,
+  arrayPreset,
+  setArrayPreset,
   sizeValue,
   setSizeValue,
   rangeValue,
@@ -27,7 +32,7 @@ export function RightSidebar({
   return (
     <aside
       aria-label="Algorithm details"
-      className="flex w-72 shrink-0 flex-col gap-6 overflow-y-auto border-l border-black/10 bg-side px-5 py-6 text-font"
+      className="flex w-72 shrink-0 flex-col gap-6 overflow-hidden border-l border-black/10 bg-side px-5 py-6 text-font"
     >
       {algorithm ? (
         <>
@@ -81,6 +86,8 @@ export function RightSidebar({
           <SidebarConfig
             sortOrder={sortOrder}
             setSortOrder={setSortOrder}
+            arrayPreset={arrayPreset}
+            setArrayPreset={setArrayPreset}
             sizeValue={sizeValue}
             setSizeValue={setSizeValue}
             rangeValue={rangeValue}

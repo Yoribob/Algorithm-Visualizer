@@ -10,6 +10,7 @@ import * as comparators from "@/lib/utils/comparators";
 import type { SortOrder } from "@/lib/utils/comparators";
 import { getRanks } from "@/lib/utils/ranks";
 import { generateArrayNumber } from "@/lib/utils/generator";
+import type { ArrayPreset } from "@/lib/utils/generator";
 import { useStepPlayer } from "@/hooks/useStepPlayer";
 import { useState } from "react";
 import type { Algorithm } from "@/lib/types/algorithm";
@@ -24,6 +25,7 @@ interface AlgorithmPanelProps {
   sizeValue: number;
   rangeValue: number;
   seedValue: number;
+  arrayPreset: ArrayPreset;
 }
 
 function AlgorithmPanel({
@@ -34,8 +36,15 @@ function AlgorithmPanel({
   sizeValue,
   rangeValue,
   seedValue,
+  arrayPreset,
 }: AlgorithmPanelProps) {
-  const array = generateArrayNumber(sizeValue, rangeValue, seedValue);
+  const array = generateArrayNumber(
+    sizeValue,
+    rangeValue,
+    seedValue,
+    arrayPreset,
+    sortOrder,
+  );
   const compareFn =
     sortOrder === "ascending"
       ? comparators.ascendingNumber
@@ -98,6 +107,7 @@ export function AppLayout() {
   const [sizeValue, setSizeValue] = useState(config.defaults.size);
   const [rangeValue, setRangeValue] = useState(config.defaults.range);
   const [seedValue, setSeedValue] = useState(config.defaults.seed);
+  const [arrayPreset, setArrayPreset] = useState<ArrayPreset>("random");
   const [sortOrder, setSortOrder] = useState<SortOrder>("ascending");
   const [showLogs, setShowLogs] = useState(true);
 
@@ -111,7 +121,7 @@ export function AppLayout() {
       {currentAlgorithm ? (
         <div className="flex min-h-0 flex-1 justify-center">
           <AlgorithmPanel
-            key={`${currentAlgorithm.slug}-${sortOrder}-${sizeValue}-${rangeValue}-${seedValue}`}
+            key={`${currentAlgorithm.slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
             algorithm={currentAlgorithm}
             sortOrder={sortOrder}
             showLogs={showLogs}
@@ -119,6 +129,7 @@ export function AppLayout() {
             sizeValue={sizeValue}
             rangeValue={rangeValue}
             seedValue={seedValue}
+            arrayPreset={arrayPreset}
           />
         </div>
       ) : (
@@ -136,6 +147,8 @@ export function AppLayout() {
         setRangeValue={setRangeValue}
         seedValue={seedValue}
         setSeedValue={setSeedValue}
+        arrayPreset={arrayPreset}
+        setArrayPreset={setArrayPreset}
       />
     </div>
   );

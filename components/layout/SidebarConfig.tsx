@@ -1,10 +1,13 @@
 import { limits } from "@/lib/config/config.json";
 import { useEffect, useState } from "react";
 import type { SortOrder } from "@/lib/utils/comparators";
+import type { ArrayPreset } from "@/lib/utils/generator";
 
 interface SidebarConfigProp {
   sortOrder: SortOrder;
   setSortOrder: (sortOrder: SortOrder) => void;
+  arrayPreset: ArrayPreset;
+  setArrayPreset: (preset: ArrayPreset) => void;
   sizeValue: number;
   rangeValue: number;
   seedValue: number;
@@ -71,6 +74,8 @@ function useClampedNumberInput(
 export function SidebarConfig({
   sortOrder,
   setSortOrder,
+  arrayPreset,
+  setArrayPreset,
   sizeValue,
   setSizeValue,
   rangeValue,
@@ -101,6 +106,32 @@ export function SidebarConfig({
     <section className="mt-auto space-y-4 rounded-lg border border-black/10 bg-main p-4">
       <h3 className="text-base font-bold">Array settings</h3>
       <div className="space-y-3">
+        <label htmlFor="array-preset" className="block">
+          <span className="mb-1.5 block text-sm font-medium">List preset</span>
+          <select
+            id="array-preset"
+            value={arrayPreset}
+            onChange={(event) => {
+              const nextPreset = event.target.value;
+              if (
+                nextPreset === "random" ||
+                nextPreset === "nearly-sorted" ||
+                nextPreset === "reversed" ||
+                nextPreset === "already-sorted" ||
+                nextPreset === "few-unique-values"
+              ) {
+                setArrayPreset(nextPreset);
+              }
+            }}
+            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+          >
+            <option value="random">Random</option>
+            <option value="nearly-sorted">Nearly sorted</option>
+            <option value="reversed">Reversed</option>
+            <option value="already-sorted">Already sorted</option>
+            <option value="few-unique-values">Few unique values</option>
+          </select>
+        </label>
         <label htmlFor="sort-order" className="block">
           <span className="mb-1.5 block text-sm font-medium">Sort order</span>
           <select

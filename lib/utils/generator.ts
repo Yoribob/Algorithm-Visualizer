@@ -8,12 +8,72 @@ function mulberry32(seed: number) {
   };
 }
 
-export function generateArrayNumber(size: number, range: number, seed: number) {
+export type ArrayPreset =
+  | "random"
+  | "nearly-sorted"
+  | "reversed"
+  | "already-sorted"
+  | "few-unique-values";
+
+export function generateArrayNumber(
+  size: number,
+  range: number,
+  seed: number,
+  preset: ArrayPreset = "random",
+  sortOrder: "ascending" | "descending" = "ascending",
+) {
   const rand = mulberry32(seed);
   const array = [];
   for (let i = 0; i < size; i++) {
     array.push(Math.floor(rand() * range));
   }
-  return array;
-}
 
+  if (preset === "random") {
+    return array;
+  }
+
+  const compare = sortOrder === "ascending"
+    ? (a: number, b: number) => a - b
+    : (a: number, b: number) => b - a;
+
+  if (preset === "already-sorted" || preset === "reversed" || preset === "nearly-sorted") {
+    array.sort(compare);
+
+    if (preset === "reversed") {
+      return array.reverse();
+    }
+
+    if (preset === "nearly-sorted") {
+      const swapCount = Math.max(1, Math.floor(size * 0.1));
+      for (let i = 0; i < swapCount; i++) {
+        const index = Math.floor(rand() * (size - 1));
+        [array[index], array[index + 1]] = [array[index + 1], array[index]];
+      }
+    }
+
+    return array;
+  }
+
+  const uniqueCount = Math.min(5, size - 1, range);
+  const minUniqueCount = Math.min(3, uniqueCount);
+  const count = minUniqueCount + Math.floor(rand() * (uniqueCount - minUniqueCount + 1));
+  const values = Array.from({ length: range }, (_, index) => index);
+
+  for (let i = 0; i < count; i++) {
+    const index = i + Math.floor(rand() * (range - i));
+    [values[i], values[index]] = [values[index], values[i]];
+  }
+
+  const uniqueValues = values.slice(0, count);
+  const result = uniqueValues.slice();
+  while (result.length < size) {
+    result.push(uniqueValues[Math.floor(rand() * uniqueValues.length)]);
+  }
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const index = Math.floor(rand() * (i + 1));
+    [result[i], result[index]] = [result[index], result[i]];
+  }
+
+  return result;
+}

@@ -1,6 +1,6 @@
 {
   "limits": {
-    "range_min": 2,
+    "range_min": 3,
     "range_max": 99,
     "size_min": 5,
     "size_max": 20,

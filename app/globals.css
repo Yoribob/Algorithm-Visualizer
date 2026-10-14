@@ -29,3 +29,11 @@
 body {
   font-family: var(--font-family-main);
 }
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
