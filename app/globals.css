@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --main: #fafafa;
+  --main: #ffffff;
   --side: #ecedf1;
   --font-color: #14161a;
   --muted: rgb(215, 215, 216);

@@ -11,8 +11,22 @@ export function useStepPlayer(totalSteps: number, initialSpeed = 50) {
   const goPrev = () => setStep((s) => Math.max(s - 1, 0));
 
   const goAuto = () => {
-    if (isAuto) setIsAuto(false);
-    else setIsAuto(true);
+    if (isAuto) {
+      setIsAuto(false);
+      return;
+    }
+
+    if (totalSteps <= 0) {
+      return;
+    }
+
+    if (step >= totalSteps - 1) {
+      setStep(0);
+      setIsAuto(true);
+      return;
+    }
+
+    setIsAuto(true);
   };
 
   const goReset = () => {

@@ -7,6 +7,7 @@ type BarChartProps<T> = {
   sortedIndexes?: number[];
   playbackSpeed: number;
   getHeight: (value: T) => number;
+  compact?: boolean;
 };
 
 export function BarChart<T>({
@@ -16,9 +17,10 @@ export function BarChart<T>({
   sortedIndexes,
   playbackSpeed,
   getHeight,
+  compact = false,
 }: BarChartProps<T>) {
   return (
-    <div className="flex flex-row items-end gap-1">
+    <div className={`flex flex-row items-end ${compact ? "w-full gap-0.5" : "gap-1"}`}>
       {values.map((value, index) => (
         <Bar
           key={index}
@@ -28,6 +30,7 @@ export function BarChart<T>({
           isActive={activeIndex === index}
           isSorted={sortedIndexes?.includes(index)}
           playbackSpeed={playbackSpeed}
+          compact={compact}
         />
       ))}
     </div>

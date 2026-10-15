@@ -18,6 +18,7 @@ type ControlsProps = {
   isAuto: boolean;
   steps: Step[];
   currentStepIndex: number;
+  secondStepCounter?: { currentStepIndex: number; totalSteps: number };
 };
 
 export function Controls({
@@ -32,19 +33,28 @@ export function Controls({
   isAuto,
   steps,
   currentStepIndex,
+  secondStepCounter,
 }: ControlsProps) {
   return (
-    <div className="flex justify-start px-12 py-8 font-semibold">
+    <div className="relative flex justify-start px-12 py-8 font-semibold">
       <span className="mr-4 w-1/13 font-medium">
         <span className="text-3xl font-bold">{currentStepIndex}</span> /{" "}
         {steps.length}
       </span>
+      {secondStepCounter && (
+        <span className="absolute left-21/40 top-1/2 -translate-y-1/2 font-medium">
+          <span className="text-3xl font-bold">
+            {secondStepCounter.currentStepIndex}
+          </span>{" "}
+          / {secondStepCounter.totalSteps}
+        </span>
+      )}
       <button
         className="flex justify-center w-1/20 cursor-pointer mx-1 bg-bar hover:bg-bar-200 hover:text-gray-200 active:scale-90
              text-white font-semibold py-2 px-4 rounded-full
              transition-transform duration-150 ease-out"
         onClick={onAuto}
-        disabled={disableNext}
+        disabled={steps.length === 0}
       >
         {isAuto ? "Pause" : "Play"}
       </button>

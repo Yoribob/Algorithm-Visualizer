@@ -5,12 +5,14 @@ interface SortVisualizerProps {
   currentStep: Step;
   ranks: Map<number, number>;
   playbackSpeed: number;
+  compact?: boolean;
 }
 
 export function SortVisualizer({
   currentStep,
   ranks,
   playbackSpeed,
+  compact = false,
 }: SortVisualizerProps) {
   return (
     <BarChart
@@ -20,6 +22,7 @@ export function SortVisualizer({
       sortedIndexes={currentStep.sortedIndexes}
       playbackSpeed={playbackSpeed}
       getHeight={(value) => ranks.get(value)! + 1}
+      compact={compact}
     />
   );
 }

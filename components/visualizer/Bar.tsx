@@ -7,6 +7,7 @@ type BarProps = {
   isHighLighted?: boolean;
   isActive?: boolean;
   isSorted?: boolean;
+  compact?: boolean;
 };
 
 export function Bar({
@@ -16,6 +17,7 @@ export function Bar({
   isHighLighted,
   isActive,
   isSorted,
+  compact = false,
 }: BarProps) {
   const backgroundColor = isActive
     ? "rgb(52, 152, 219)"
@@ -32,10 +34,12 @@ export function Bar({
 
   return (
     <div
-      className="rounded-t-lg flex w-[65px] items-center justify-center transition-[height] ease-in-out delay-[var(--playback-delay)] text-white font-semibold"
+      className={`rounded-t-lg flex items-center justify-center overflow-hidden transition-[height] ease-in-out delay-[var(--playback-delay)] text-white font-semibold ${
+        compact ? "min-w-0 flex-1 text-xs" : "w-[65px] text-xl"
+      }`}
       style={style}
     >
-      <span className="text-xl">{label}</span>
+      <span className="truncate">{label}</span>
     </div>
   );
 }

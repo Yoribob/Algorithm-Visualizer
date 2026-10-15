@@ -2,3 +2,4 @@
 .next
 node_modules
 lib/algorithms/temptest.ts
+tsconfig.tsbuildinfo
