@@ -3,15 +3,18 @@
 import { useState } from "react";
 import type { AlgorithmEntry, Algorithm } from "@/lib/types/algorithm";
 import { CompareMode } from "./CompareMode";
+import type { CompareCategory } from "./CompareMode";
 interface SidebarProps {
   algorithms: AlgorithmEntry;
   selected: Algorithm | null;
   onSelect: (algorithm: Algorithm) => void;
   isComparing: boolean;
   onToggleCompare: () => void;
-  compareAlgorithms: [Algorithm, Algorithm];
-  onSelectCompareFirst: (algorithm: Algorithm) => void;
-  onSelectCompareSecond: (algorithm: Algorithm) => void;
+  compareCategory: CompareCategory | null;
+  compareAlgorithms: [Algorithm | null, Algorithm | null];
+  onSelectCompareCategory: (category: CompareCategory | null) => void;
+  onSelectCompareFirst: (algorithm: Algorithm | null) => void;
+  onSelectCompareSecond: (algorithm: Algorithm | null) => void;
 }
 
 export function LeftSidebar({
@@ -20,7 +23,9 @@ export function LeftSidebar({
   onSelect,
   isComparing,
   onToggleCompare,
+  compareCategory,
   compareAlgorithms,
+  onSelectCompareCategory,
   onSelectCompareFirst,
   onSelectCompareSecond,
 }: SidebarProps) {
@@ -102,8 +107,9 @@ export function LeftSidebar({
       {isComparing && (
         <CompareMode
           algorithms={algorithms}
-          firstAlgorithm={compareAlgorithms[0]}
-          secondAlgorithm={compareAlgorithms[1]}
+          category={compareCategory}
+          selectedAlgorithms={compareAlgorithms}
+          onSelectCategory={onSelectCompareCategory}
           onSelectFirst={onSelectCompareFirst}
           onSelectSecond={onSelectCompareSecond}
         />

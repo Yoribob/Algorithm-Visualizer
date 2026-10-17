@@ -2,8 +2,13 @@ import { limits } from "@/lib/config/config.json";
 import { useEffect, useState } from "react";
 import type { SortOrder } from "@/lib/utils/comparators";
 import type { ArrayPreset } from "@/lib/utils/generator";
+import type { Category } from "@/lib/types/algorithm";
 
 interface SidebarConfigProp {
+  category?: Category | null;
+  usesBinarySearch: boolean;
+  target: string | null;
+  setTarget: (target: string) => void;
   sortOrder: SortOrder;
   setSortOrder: (sortOrder: SortOrder) => void;
   arrayPreset: ArrayPreset;
@@ -72,6 +77,10 @@ function useClampedNumberInput(
 }
 
 export function SidebarConfig({
+  category,
+  usesBinarySearch,
+  target,
+  setTarget,
   sortOrder,
   setSortOrder,
   arrayPreset,
@@ -83,11 +92,19 @@ export function SidebarConfig({
   seedValue,
   setSeedValue,
 }: SidebarConfigProp) {
+  const sizeMin =
+    category === "Search"
+      ? Number(limits.size_search_min)
+      : limits.size_min;
+  const sizeMax =
+    category === "Search"
+      ? Number(limits.size_search_max)
+      : limits.size_max;
   const size = useClampedNumberInput(
     sizeValue,
     setSizeValue,
-    limits.size_min,
-    limits.size_max
+    sizeMin,
+    sizeMax
   );
   const range = useClampedNumberInput(
     rangeValue,
@@ -102,65 +119,101 @@ export function SidebarConfig({
     limits.seed_max
   );
 
+  const applyTarget = () => {
+    const parsedTarget = target === null ? Number.NaN : Number(target);
+    const targetValue = Number.isFinite(parsedTarget)
+      ? Math.trunc(parsedTarget)
+      : limits.range_min;
+    setTarget(
+      String(clamp(targetValue, limits.range_min, limits.range_max)),
+    );
+  };
+
   return (
     <section className="mt-auto space-y-4 rounded-lg border border-black/10 bg-main p-4">
       <h3 className="text-base font-bold">Array settings</h3>
       <div className="space-y-3">
-        <label htmlFor="array-preset" className="block">
-          <span className="mb-1.5 block text-sm font-medium">List preset</span>
-          <select
-            id="array-preset"
-            value={arrayPreset}
-            onChange={(event) => {
-              const nextPreset = event.target.value;
-              if (
-                nextPreset === "random" ||
-                nextPreset === "nearly-sorted" ||
-                nextPreset === "reversed" ||
-                nextPreset === "already-sorted" ||
-                nextPreset === "few-unique-values"
-              ) {
-                setArrayPreset(nextPreset);
-              }
-            }}
-            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
-          >
-            <option value="random">Random</option>
-            <option value="nearly-sorted">Nearly sorted</option>
-            <option value="reversed">Reversed</option>
-            <option value="already-sorted">Already sorted</option>
-            <option value="few-unique-values">Few unique values</option>
-          </select>
-        </label>
-        <label htmlFor="sort-order" className="block">
-          <span className="mb-1.5 block text-sm font-medium">Sort order</span>
-          <select
-            id="sort-order"
-            value={sortOrder}
-            onChange={(event) => {
-              const nextOrder = event.target.value;
-              if (nextOrder === "ascending" || nextOrder === "descending") {
-                setSortOrder(nextOrder);
-              }
-            }}
-            className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
-          >
-            <option value="ascending">Ascending</option>
-            <option value="descending">Descending</option>
-          </select>
-        </label>
+        {category === "Search" && (
+          <label htmlFor="search-target" className="block">
+            <span className="mb-1.5 block text-sm font-medium">Target</span>
+            <input
+              id="search-target"
+              type="number"
+              step={1}
+              min={limits.range_min}
+              max={limits.range_max}
+              value={target ?? ""}
+              onChange={(event) => setTarget(event.target.value)}
+              onBlur={applyTarget}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  applyTarget();
+                  event.currentTarget.blur();
+                }
+              }}
+              className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm tabular-nums outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+            />
+          </label>
+        )}
+        {!usesBinarySearch && (
+          <label htmlFor="array-preset" className="block">
+            <span className="mb-1.5 block text-sm font-medium">List preset</span>
+            <select
+              id="array-preset"
+              value={arrayPreset}
+              onChange={(event) => {
+                const nextPreset = event.target.value;
+                if (
+                  nextPreset === "random" ||
+                  nextPreset === "nearly-sorted" ||
+                  nextPreset === "reversed" ||
+                  nextPreset === "already-sorted" ||
+                  nextPreset === "few-unique-values"
+                ) {
+                  setArrayPreset(nextPreset);
+                }
+              }}
+              className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm outline-none focus:border-bar focus:ring-2 focus:ring-bar/15"
+            >
+              <option value="random">Random</option>
+              <option value="nearly-sorted">Nearly sorted</option>
+              <option value="reversed">Reversed</option>
+              <option value="already-sorted">Already sorted</option>
+              <option value="few-unique-values">Few unique values</option>
+            </select>
+          </label>
+        )}
+        {(category === "Sort" || usesBinarySearch) && (
+          <label htmlFor="sort-order" className="block">
+            <span className="mb-1.5 block text-sm font-medium">Sort order</span>
+            <select
+              id="sort-order"
+              value={sortOrder}
+              onChange={(event) => {
+                const nextOrder = event.target.value;
+                if (nextOrder === "ascending" || nextOrder === "descending") {
+                  setSortOrder(nextOrder);
+                }
+              }}
+              className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm outline-none transition focus:border-bar focus:ring-2 focus:ring-bar/15"
+            >
+              <option value="ascending">Ascending</option>
+              <option value="descending">Descending</option>
+            </select>
+          </label>
+        )}
         <label htmlFor="array-size" className="block">
           <span className="mb-1.5 flex items-center justify-between gap-2 text-sm font-medium">
             <span>Size</span>
             <span className="text-xs font-normal text-black/50">
-              {limits.size_min}–{limits.size_max}
+              {sizeMin}–{sizeMax}
             </span>
           </span>
           <input
             id="array-size"
             type="number"
-            min={limits.size_min}
-            max={limits.size_max}
+            min={sizeMin}
+            max={sizeMax}
             value={size.draft}
             onChange={size.handleChange}
             onBlur={size.handleBlur}

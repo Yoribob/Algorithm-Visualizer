@@ -16,7 +16,13 @@ function sliceArray({
 
 function getMessage(step: Step) {
   let message = "";
-  if (step.swapped && step.comparingIndexes) {
+  if (step.activeIndex !== undefined && step.searchTarget !== undefined) {
+    if (step.foundIndex !== undefined) {
+      message = `Found target ${step.searchTarget} at index ${step.foundIndex}`;
+    } else {
+      message = `Checking index ${step.activeIndex}: ${step.array[step.activeIndex]} is not target ${step.searchTarget}`;
+    }
+  } else if (step.swapped && step.comparingIndexes) {
     const [firstIndex, secondIndex] = step.comparingIndexes;
     message = `Swapping values ${step.array[firstIndex]} and ${step.array[secondIndex]}`;
   } else if (step.swapped && step.activeIndex !== undefined) {

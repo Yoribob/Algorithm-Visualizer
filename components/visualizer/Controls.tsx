@@ -39,14 +39,14 @@ export function Controls({
     <div className="relative flex justify-start px-12 py-8 font-semibold">
       <span className="mr-4 w-1/13 font-medium">
         <span className="text-3xl font-bold">{currentStepIndex}</span> /{" "}
-        {steps.length}
+        {steps.length - 1}
       </span>
       {secondStepCounter && (
         <span className="absolute left-21/40 top-1/2 -translate-y-1/2 font-medium">
           <span className="text-3xl font-bold">
             {secondStepCounter.currentStepIndex}
           </span>{" "}
-          / {secondStepCounter.totalSteps}
+          / {secondStepCounter.totalSteps - 1}
         </span>
       )}
       <button

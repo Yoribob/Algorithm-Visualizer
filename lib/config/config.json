@@ -4,6 +4,8 @@
     "range_max": 99,
     "size_min": 5,
     "size_max": 20,
+    "size_search_min": "5",
+    "size_search_max": "100",
     "seed_min": 1,
     "seed_max": 99
   },

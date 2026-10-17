@@ -13,43 +13,47 @@ import { generateArrayNumber } from "@/lib/utils/generator";
 import type { ArrayPreset } from "@/lib/utils/generator";
 import { useStepPlayer } from "@/hooks/useStepPlayer";
 import { useState } from "react";
-import type { Algorithm } from "@/lib/types/algorithm";
+import type { Algorithm, CompareFn } from "@/lib/types/algorithm";
+import type { CompareCategory } from "./CompareMode";
 import type { Step } from "@/lib/types/steps";
 import * as config from "@/lib/config/config.json";
 
+function getAlgorithmSteps(
+  algorithm: Algorithm,
+  array: number[],
+  compareFn: CompareFn,
+  target: number,
+  sortOrder: SortOrder,
+): Step[] {
+  if (algorithm.category === "Sort") {
+    return algorithm.run(array, compareFn).steps;
+  }
+
+  return algorithm.run(array, target, sortOrder).steps;
+}
+
 interface AlgorithmPanelProps {
   algorithm: Algorithm;
+  array: number[];
+  target: number;
   sortOrder: SortOrder;
   showLogs: boolean;
   onToggleLogs: () => void;
-  sizeValue: number;
-  rangeValue: number;
-  seedValue: number;
-  arrayPreset: ArrayPreset;
 }
 
 function AlgorithmPanel({
   algorithm,
+  array,
+  target,
   sortOrder,
   showLogs,
   onToggleLogs,
-  sizeValue,
-  rangeValue,
-  seedValue,
-  arrayPreset,
 }: AlgorithmPanelProps) {
-  const array = generateArrayNumber(
-    sizeValue,
-    rangeValue,
-    seedValue,
-    arrayPreset,
-    sortOrder,
-  );
   const compareFn =
     sortOrder === "ascending"
       ? comparators.ascendingNumber
       : comparators.descendingNumber;
-  const steps: Step[] = algorithm.run(array, compareFn).steps;
+  const steps = getAlgorithmSteps(algorithm, array, compareFn, target, sortOrder);
   const ranks = getRanks(array, comparators.ascendingNumber);
   const {
     step,
@@ -67,6 +71,8 @@ function AlgorithmPanel({
     return null;
   }
 
+  const category = algorithm.category;
+
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col items-center justify-end mt-20">
@@ -74,6 +80,7 @@ function AlgorithmPanel({
           currentStep={currentStep}
           ranks={ranks}
           playbackSpeed={playbackSpeed}
+          category={category}
         />
       </div>
       <hr className="my-8 h-px w-full self-center border-0 bg-bar"/>
@@ -102,40 +109,41 @@ function AlgorithmPanel({
 
 interface ComparisonPanelProps {
   algorithms: [Algorithm, Algorithm];
+  array: number[];
+  target: number;
   sortOrder: SortOrder;
   showLogs: boolean;
-  sizeValue: number;
-  rangeValue: number;
-  seedValue: number;
-  arrayPreset: ArrayPreset;
 }
 
 function ComparisonPanel({
   algorithms,
+  array,
+  target,
   sortOrder,
   showLogs,
-  sizeValue,
-  rangeValue,
-  seedValue,
-  arrayPreset,
 }: ComparisonPanelProps) {
   const [algorithmLogs, setAlgorithmLogs] = useState<[boolean, boolean]>([
     showLogs,
     showLogs,
   ]);
-  const array = generateArrayNumber(
-    sizeValue,
-    rangeValue,
-    seedValue,
-    arrayPreset,
-    sortOrder,
-  );
   const compareFn =
     sortOrder === "ascending"
       ? comparators.ascendingNumber
       : comparators.descendingNumber;
-  const firstSteps = algorithms[0].run(array, compareFn).steps;
-  const secondSteps = algorithms[1].run(array, compareFn).steps;
+  const firstSteps = getAlgorithmSteps(
+    algorithms[0],
+    array,
+    compareFn,
+    target,
+    sortOrder,
+  );
+  const secondSteps = getAlgorithmSteps(
+    algorithms[1],
+    array,
+    compareFn,
+    target,
+    sortOrder,
+  );
   const timelineSteps =
     firstSteps.length >= secondSteps.length ? firstSteps : secondSteps;
   const {
@@ -161,6 +169,8 @@ function ComparisonPanel({
       return null;
     }
 
+    const category = algorithm.category;
+
     return (
       <section
         key={algorithm.slug}
@@ -175,6 +185,7 @@ function ComparisonPanel({
             ranks={ranks}
             playbackSpeed={playbackSpeed}
             compact
+            category={category}
           />
         </div>
         <hr className="h-px w-full shrink-0 border-0 bg-bar" />
@@ -228,8 +239,10 @@ export function AppLayout() {
     null,
   );
   const [compareAlgorithms, setCompareAlgorithms] = useState<
-    [Algorithm, Algorithm]
-  >([algorithms[0], algorithms[1]]);
+    [Algorithm | null, Algorithm | null]
+  >([null, null]);
+  const [compareCategory, setCompareCategory] =
+    useState<CompareCategory | null>(null);
   const [isComparing, setIsComparing] = useState(false);
   const [sizeValue, setSizeValue] = useState(config.defaults.size);
   const [rangeValue, setRangeValue] = useState(config.defaults.range);
@@ -237,6 +250,30 @@ export function AppLayout() {
   const [arrayPreset, setArrayPreset] = useState<ArrayPreset>("random");
   const [sortOrder, setSortOrder] = useState<SortOrder>("ascending");
   const [showLogs, setShowLogs] = useState(true);
+  const [target, setTarget] = useState<string | null>(null);
+  const usesBinarySearch = isComparing
+    ? compareAlgorithms.some((algorithm) => algorithm?.slug === "binary-search")
+    : currentAlgorithm?.slug === "binary-search";
+  const generatedArray = generateArrayNumber(
+    sizeValue,
+    rangeValue,
+    seedValue,
+    usesBinarySearch ? "already-sorted" : arrayPreset,
+    sortOrder,
+  );
+  const array = generatedArray;
+  const middleIndex = Math.floor((array.length - 1) / 2);
+  const defaultTarget = array[middleIndex] ?? 0;
+  const numericTarget = target === null || target.trim() === ""
+    ? Number.NaN
+    : Number(target);
+  const effectiveTarget = Number.isSafeInteger(numericTarget)
+    ? numericTarget
+    : defaultTarget;
+  const selectedComparisonAlgorithms: [Algorithm, Algorithm] | null =
+    compareAlgorithms[0] && compareAlgorithms[1]
+      ? [compareAlgorithms[0], compareAlgorithms[1]]
+      : null;
 
   const toggleCompare = () => {
     if (isComparing) {
@@ -244,69 +281,77 @@ export function AppLayout() {
       return;
     }
 
-    const firstAlgorithm = currentAlgorithm ?? algorithms[0];
-    const secondAlgorithm =
-      algorithms.find((algorithm) => algorithm.slug !== firstAlgorithm.slug) ??
-      algorithms[1];
-    setCompareAlgorithms([firstAlgorithm, secondAlgorithm]);
+    setCompareCategory(null);
+    setCompareAlgorithms([null, null]);
     setIsComparing(true);
   };
 
-  const selectCompareFirst = (algorithm: Algorithm) => {
-    setCompareAlgorithms(([first, second]) => {
-      if (algorithm.slug === second.slug) {
-        return [algorithm, first];
-      }
-      return [algorithm, second];
-    });
+  const selectCompareCategory = (category: CompareCategory | null) => {
+    if (
+      category === "Sort" &&
+      (compareCategory === "Search" ||
+        (!compareCategory && currentAlgorithm?.category === "Search"))
+    ) {
+      setSizeValue(config.defaults.size);
+    }
+    setCompareCategory(category);
+    setCompareAlgorithms([null, null]);
   };
 
-  const selectCompareSecond = (algorithm: Algorithm) => {
-    setCompareAlgorithms(([first, second]) => {
-      if (algorithm.slug === first.slug) {
-        return [second, algorithm];
-      }
-      return [first, algorithm];
-    });
+  const selectAlgorithm = (algorithm: Algorithm) => {
+    if (currentAlgorithm?.category === "Search" && algorithm.category === "Sort") {
+      setSizeValue(config.defaults.size);
+    }
+    setCurrentAlgorithm(algorithm);
   };
+
+  const selectCompareFirst = (algorithm: Algorithm | null) =>
+    setCompareAlgorithms(([, second]) => [algorithm, second]);
+
+  const selectCompareSecond = (algorithm: Algorithm | null) =>
+    setCompareAlgorithms(([first]) => [first, algorithm]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <LeftSidebar
         algorithms={algorithms}
         selected={currentAlgorithm}
-        onSelect={setCurrentAlgorithm}
+        onSelect={selectAlgorithm}
         isComparing={isComparing}
         onToggleCompare={toggleCompare}
+        compareCategory={compareCategory}
         compareAlgorithms={compareAlgorithms}
+        onSelectCompareCategory={selectCompareCategory}
         onSelectCompareFirst={selectCompareFirst}
         onSelectCompareSecond={selectCompareSecond}
       />
       {isComparing ? (
         <div className="flex min-h-0 flex-1 justify-center">
-          <ComparisonPanel
-            key={`${compareAlgorithms[0].slug}-${compareAlgorithms[1].slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
-            algorithms={compareAlgorithms}
-            sortOrder={sortOrder}
-            showLogs={showLogs}
-            sizeValue={sizeValue}
-            rangeValue={rangeValue}
-            seedValue={seedValue}
-            arrayPreset={arrayPreset}
-          />
+          {selectedComparisonAlgorithms ? (
+            <ComparisonPanel
+              key={`${selectedComparisonAlgorithms[0].slug}-${selectedComparisonAlgorithms[1].slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
+              algorithms={selectedComparisonAlgorithms}
+              array={array}
+              target={effectiveTarget}
+              sortOrder={sortOrder}
+              showLogs={showLogs}
+            />
+          ) : (
+            <div className="flex flex-1 items-center justify-center">
+              <p>Select a category and two algorithms to compare</p>
+            </div>
+          )}
         </div>
       ) : currentAlgorithm ? (
         <div className="flex min-h-0 flex-1 justify-center">
           <AlgorithmPanel
             key={`${currentAlgorithm.slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
             algorithm={currentAlgorithm}
+            array={array}
+            target={effectiveTarget}
             sortOrder={sortOrder}
             showLogs={showLogs}
             onToggleLogs={() => setShowLogs((visible) => !visible)}
-            sizeValue={sizeValue}
-            rangeValue={rangeValue}
-            seedValue={seedValue}
-            arrayPreset={arrayPreset}
           />
         </div>
       ) : (
@@ -315,7 +360,16 @@ export function AppLayout() {
         </div>
       )}
       <RightSidebar
-        algorithm={currentAlgorithm}
+        algorithm={isComparing ? compareAlgorithms[0] : currentAlgorithm}
+        category={isComparing ? compareCategory : currentAlgorithm?.category ?? null}
+        usesBinarySearch={usesBinarySearch}
+        showConfig={
+          isComparing
+            ? selectedComparisonAlgorithms !== null
+            : Boolean(currentAlgorithm)
+        }
+        target={target ?? String(defaultTarget)}
+        setTarget={setTarget}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
         sizeValue={sizeValue}

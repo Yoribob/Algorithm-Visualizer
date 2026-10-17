@@ -3,13 +3,15 @@ import { selectionSort } from "./array/selectionSort";
 import { insertionSort } from "./array/insertionSort";
 import { mergeSort } from "./array/mergeSort";
 import { quickSortSimple } from "./array/quickSortSimple";
+import { linearSearch } from "./search/linearSearch";
+import { binarySearch } from "./search/binarySearch";
 import type { AlgorithmEntry } from "@/lib/types/algorithm";
 
 export const algorithms: AlgorithmEntry = [
   {
     name: "Bubble Sort",
     slug: "bubble-sort",
-    category: "Array",
+    category: "Sort",
     description:
       "Repeatedly steps through the array, comparing adjacent elements and swapping them if they're in the wrong order.",
     difficulty: "Easy",
@@ -20,7 +22,7 @@ export const algorithms: AlgorithmEntry = [
   {
     name: "Selection Sort",
     slug: "selection-sort",
-    category: "Array",
+    category: "Sort",
     description:
       "Repeatedly finds the minimum (or maximum) element from the unsorted portion of the array and swaps it into its correct position.",
     difficulty: "Easy",
@@ -31,7 +33,7 @@ export const algorithms: AlgorithmEntry = [
   {
     name: "Insertion Sort",
     slug: "insertion-sort",
-    category: "Array",
+    category: "Sort",
     description:
       "Builds the sorted array one element at a time by repeatedly taking the next element and inserting it into its correct position among the previously sorted elements.",
     difficulty: "Easy",
@@ -40,25 +42,47 @@ export const algorithms: AlgorithmEntry = [
     run: insertionSort,
   },
   {
-  name: "Merge Sort",
-  slug: "merge-sort",
-  category: "Array",
-  description:
-    "A divide-and-conquer algorithm that recursively splits the array into halves, sorts each half, and then merges the sorted halves back together.",
-  difficulty: "Medium",
-  timeComplexity: ["O(n \\log n)", "O(n \\log n)", "O(n \\log n)"],
-  spaceComplexity: "O(n)",
-  run: mergeSort,
+    name: "Merge Sort",
+    slug: "merge-sort",
+    category: "Sort",
+    description:
+      "A divide-and-conquer algorithm that recursively splits the array into halves, sorts each half, and then merges the sorted halves back together.",
+    difficulty: "Medium",
+    timeComplexity: ["O(n \\log n)", "O(n \\log n)", "O(n \\log n)"],
+    spaceComplexity: "O(n)",
+    run: mergeSort,
   },
   {
-  name: "Quick Sort",
-  slug: "quick-sort",
-  category: "Array",
+    name: "Quick Sort",
+    slug: "quick-sort",
+    category: "Sort",
+    description:
+      "A divide-and-conquer algorithm that picks a pivot, moves smaller elements to its left and larger ones to its right, then recursively sorts each side.",
+    difficulty: "Medium",
+    timeComplexity: ["O(n \\log n)", "O(n \\log n)", "O(n^2)"],
+    spaceComplexity: "O(\\log n)",
+    run: quickSortSimple,
+  },
+  {
+    name: "Linear Search",
+    slug: "linear-search",
+    category: "Search",
+    description:
+      "A sequential search that checks each element from the start of the array, one by one, until it finds the target or reaches the end of the list. It works on unsorted data.",
+    difficulty: "Easy",
+    timeComplexity: ["O(n)", "O(n)", "O(1)"],
+    spaceComplexity: "O(1)",
+    run: linearSearch,
+  },
+  {
+  name: "Binary Search",
+  slug: "binary-search",
+  category: "Search",
   description:
-    "A divide-and-conquer algorithm that selects a pivot element, partitions the array into elements smaller and larger than the pivot, and recursively sorts the sub-arrays.",
-  difficulty: "Medium",
-  timeComplexity: ["O(n \\log n)", "O(n \\log n)", "O(n^2)"],
-  spaceComplexity: "O(n)",
-  run: quickSortSimple,
+    "A divide-and-conquer search that repeatedly compares the target to the middle element of a sorted array and discards the half that cannot contain it, until the target is found or the range is empty. It requires sorted data.",
+  difficulty: "Easy",
+  timeComplexity: ["O(log n)", "O(log n)", "O(1)"],
+  spaceComplexity: "O(1)",
+  run: binarySearch,
 },
 ];
