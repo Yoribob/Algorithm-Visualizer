@@ -251,14 +251,19 @@ export function AppLayout() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("ascending");
   const [showLogs, setShowLogs] = useState(true);
   const [target, setTarget] = useState<string | null>(null);
-  const usesBinarySearch = isComparing
-    ? compareAlgorithms.some((algorithm) => algorithm?.slug === "binary-search")
-    : currentAlgorithm?.slug === "binary-search";
+  const requiresSortedArray = isComparing
+    ? compareAlgorithms.some(
+        (algorithm) =>
+          algorithm?.slug === "binary-search" ||
+          algorithm?.slug === "jump-search",
+      )
+    : currentAlgorithm?.slug === "binary-search" ||
+      currentAlgorithm?.slug === "jump-search";
   const generatedArray = generateArrayNumber(
     sizeValue,
     rangeValue,
     seedValue,
-    usesBinarySearch ? "already-sorted" : arrayPreset,
+    requiresSortedArray ? "already-sorted" : arrayPreset,
     sortOrder,
   );
   const array = generatedArray;
@@ -362,7 +367,7 @@ export function AppLayout() {
       <RightSidebar
         algorithm={isComparing ? compareAlgorithms[0] : currentAlgorithm}
         category={isComparing ? compareCategory : currentAlgorithm?.category ?? null}
-        usesBinarySearch={usesBinarySearch}
+        requiresSortedArray={requiresSortedArray}
         showConfig={
           isComparing
             ? selectedComparisonAlgorithms !== null

@@ -5,6 +5,7 @@ import { mergeSort } from "./array/mergeSort";
 import { quickSortSimple } from "./array/quickSortSimple";
 import { linearSearch } from "./search/linearSearch";
 import { binarySearch } from "./search/binarySearch";
+import { jumpSearch } from "./search/jumpSearch";
 import type { AlgorithmEntry } from "@/lib/types/algorithm";
 
 export const algorithms: AlgorithmEntry = [
@@ -85,4 +86,15 @@ export const algorithms: AlgorithmEntry = [
   spaceComplexity: "O(1)",
   run: binarySearch,
 },
+  {
+    name: "Jump Search",
+    slug: "jump-search",
+    category: "Search",
+    description:
+      "A block-based search that jumps ahead by a fixed step size and then performs a linear scan within the block containing the target. It requires sorted data.",
+    difficulty: "Medium",
+    timeComplexity: ["O(\sqrt{n})", "O(\sqrt{n})", "O(1)"],
+    spaceComplexity: "O(1)",
+    run: jumpSearch,
+  },
 ];

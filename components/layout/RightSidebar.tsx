@@ -5,7 +5,7 @@ import { SidebarConfig } from "./SidebarConfig";
 interface SidebarProps {
   algorithm: Algorithm | null;
   category: Category | null;
-  usesBinarySearch: boolean;
+  requiresSortedArray: boolean;
   showConfig: boolean;
   target: string | null;
   setTarget: (target: string) => void;
@@ -24,7 +24,7 @@ interface SidebarProps {
 export function RightSidebar({
   algorithm,
   category,
-  usesBinarySearch,
+  requiresSortedArray,
   showConfig,
   target,
   setTarget,
@@ -99,7 +99,7 @@ export function RightSidebar({
       {showConfig ? (
         <SidebarConfig
           category={category}
-          usesBinarySearch={usesBinarySearch}
+          requiresSortedArray={requiresSortedArray}
           target={target}
           setTarget={setTarget}
           sortOrder={sortOrder}

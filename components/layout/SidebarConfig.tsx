@@ -6,7 +6,7 @@ import type { Category } from "@/lib/types/algorithm";
 
 interface SidebarConfigProp {
   category?: Category | null;
-  usesBinarySearch: boolean;
+  requiresSortedArray: boolean;
   target: string | null;
   setTarget: (target: string) => void;
   sortOrder: SortOrder;
@@ -78,7 +78,7 @@ function useClampedNumberInput(
 
 export function SidebarConfig({
   category,
-  usesBinarySearch,
+  requiresSortedArray,
   target,
   setTarget,
   sortOrder,
@@ -155,7 +155,7 @@ export function SidebarConfig({
             />
           </label>
         )}
-        {!usesBinarySearch && (
+        {!requiresSortedArray && (
           <label htmlFor="array-preset" className="block">
             <span className="mb-1.5 block text-sm font-medium">List preset</span>
             <select
@@ -183,7 +183,7 @@ export function SidebarConfig({
             </select>
           </label>
         )}
-        {(category === "Sort" || usesBinarySearch) && (
+        {(category === "Sort" || requiresSortedArray) && (
           <label htmlFor="sort-order" className="block">
             <span className="mb-1.5 block text-sm font-medium">Sort order</span>
             <select
