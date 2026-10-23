@@ -1,3 +1,5 @@
+import type { TreeNode } from "@/lib/types/tree";
+
 function mulberry32(seed: number) {
   return function () {
     seed |= 0;
@@ -6,6 +8,57 @@ function mulberry32(seed: number) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+export function generateBinaryTree(
+  size: number,
+  range: number,
+  seed: number,
+): TreeNode | null {
+  if (!Number.isInteger(size) || size < 0) {
+    throw new RangeError("Tree size must be a positive integer.");
+  }
+
+  if (!Number.isInteger(range) || range <= 0) {
+    throw new RangeError("Value range must be a positive integer.");
+  }
+
+  if (size === 0) {
+    return null;
+  }
+
+  const rand = mulberry32(seed);
+  const createNode = (index: number): TreeNode => ({
+    id: `${index}`,
+    value: Math.floor(rand() * range),
+    leftNode: null,
+    rightNode: null,
+  });
+
+  const root = createNode(0);
+  const availableSlots: {
+    parent: TreeNode;
+    side: "leftNode" | "rightNode";
+  }[] = [
+    { parent: root, side: "leftNode" },
+    { parent: root, side: "rightNode" },
+  ];
+
+  for (let index = 1; index < size; index++) {
+    const slotIndex = Math.floor(rand() * availableSlots.length);
+    const [slot] = availableSlots.splice(slotIndex, 1);
+    const node = createNode(index);
+    if (index === 1 && range > 1 && node.value === root.value) {
+      node.value = (node.value + 1) % range;
+    }
+    slot.parent[slot.side] = node;
+    availableSlots.push(
+      { parent: node, side: "leftNode" },
+      { parent: node, side: "rightNode" },
+    );
+  }
+
+  return root;
 }
 
 export type ArrayPreset =

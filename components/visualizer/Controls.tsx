@@ -5,7 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Step } from "@/lib/types/steps";
+import type { Step, TreeStep } from "@/lib/types/steps";
 type ControlsProps = {
   onPrev: () => void;
   onNext: () => void;
@@ -16,7 +16,7 @@ type ControlsProps = {
   disablePrev: boolean;
   disableNext: boolean;
   isAuto: boolean;
-  steps: Step[];
+  steps: Step[] | TreeStep[];
   currentStepIndex: number;
   secondStepCounter?: { currentStepIndex: number; totalSteps: number };
 };
@@ -36,15 +36,15 @@ export function Controls({
   secondStepCounter,
 }: ControlsProps) {
   return (
-    <div className="relative flex justify-start px-12 py-8 font-semibold">
+    <div className="relative flex shrink-0 justify-start px-12 py-8 font-semibold">
       <span className="mr-4 w-1/13 font-medium">
-        <span className="text-3xl font-bold">{currentStepIndex}</span> /{" "}
+        <span className="text-3xl font-bold">{currentStepIndex + 1}</span> /{" "}
         {steps.length - 1}
       </span>
       {secondStepCounter && (
         <span className="absolute left-21/40 top-1/2 -translate-y-1/2 font-medium">
           <span className="text-3xl font-bold">
-            {secondStepCounter.currentStepIndex}
+            {secondStepCounter.currentStepIndex + 1}
           </span>{" "}
           / {secondStepCounter.totalSteps - 1}
         </span>

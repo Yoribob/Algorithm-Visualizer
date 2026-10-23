@@ -1,6 +1,6 @@
-import type { Step } from "@/lib/types/steps";
+import type { Step, TreeStep } from "@/lib/types/steps";
 interface StatusBarProps {
-  steps: Step[];
+  steps: Step[] | TreeStep[];
   currentStepIndex: number;
   showLogs: boolean;
   onToggleLogs: () => void;
@@ -14,7 +14,20 @@ function sliceArray({
   return slicedArray;
 }
 
-function getMessage(step: Step) {
+function getMessage(step: Step | TreeStep) {
+  if (!("array" in step)) {
+    if (step.currentId === null) {
+      return `Searching for target ${step.searchTarget}`;
+    }
+    if (step.status === "found") {
+      return `Found target ${step.searchTarget}`;
+    }
+    if (step.status === "not-found") {
+      return `Target ${step.searchTarget} not found`;
+    }
+    return `Checking node ${step.currentId}`;
+  }
+
   let message = "";
   if (step.activeIndex !== undefined && step.searchTarget !== undefined) {
     if (step.foundIndex !== undefined) {
@@ -54,7 +67,7 @@ export function StatusBar({
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col bg-main p-3 text-lg">
-      <div className="relative font-bold h-15">
+      <div className="relative h-15 shrink-0 font-bold">
         <span className="text-4xl">Status log</span>
         <button
           aria-pressed={showLogs}
@@ -67,7 +80,13 @@ export function StatusBar({
         </button>
       </div>
 
-      <div className="-mx-3 min-h-0 flex-1 overflow-y-auto px-3">
+      <div
+        className={`-mx-3 min-h-0 flex-1 px-3 ${
+          showLogs
+            ? "status-log-scrollbar overflow-y-scroll"
+            : "overflow-hidden"
+        }`}
+      >
         <ul className="space-y-1">
           {showLogs
             ? visibleSteps.map((step, index) => (

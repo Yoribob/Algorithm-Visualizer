@@ -1,3 +1,11 @@
+export type TreeStep = {
+  currentId: string | null;
+  visitedIds: string[];
+  queueIds: string[];
+  searchTarget: number;
+  status: "checking" | "found" | "not-found";
+};
+
 export type Step = {
   array: number[];
   comparingIndexes?: [number, number];

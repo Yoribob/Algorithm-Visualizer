@@ -37,3 +37,17 @@ body {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+.status-log-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: rgb(156 163 175) transparent;
+}
+
+.status-log-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.status-log-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(156 163 175);
+}

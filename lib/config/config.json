@@ -13,5 +13,8 @@
     "range": 50,
     "size": 20,
     "seed": 1
+  },
+  "sizes":{
+    "node_width": 72
   }
 }

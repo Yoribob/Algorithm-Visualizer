@@ -88,7 +88,7 @@ export function LeftSidebar({
                   {categoryAlgorithms.map((algorithm) => (
                     <li
                       key={algorithm.slug}
-                      className={`cursor-pointer select-none rounded-md mt-1.75 px-2 ml-2.5 h-8 flex items-center ${
+                      className={`cursor-pointer select-none rounded-md mt-1.75 px-2 ml-2.5 min-h-8 flex items-center ${
                         selected?.slug === algorithm.slug
                           ? "bg-bar text-white font-medium"
                           : "hover:bg-muted"

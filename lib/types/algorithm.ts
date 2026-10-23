@@ -1,4 +1,5 @@
-import type { Step } from "@/lib/types/steps";
+import type { Step, TreeStep } from "@/lib/types/steps";
+import type { Tree } from "@/lib/types/tree";
 import type { SortOrder } from "@/lib/utils/comparators";
 
 export type Difficulty = "Easy" | "Medium" | "Hard";
@@ -33,5 +34,13 @@ export interface SearchAlgorithm extends AlgorithmInfo {
   ) => { found: boolean; index: number | null; steps: Step[] };
 }
 
-export type Algorithm = SortAlgorithm | SearchAlgorithm;
+export interface TreeAlgorithm extends AlgorithmInfo {
+  category: "Tree";
+  run: (
+    root: Tree,
+    target: number,
+  ) => { found: boolean; id: string | null; steps: TreeStep[] };
+}
+
+export type Algorithm = SortAlgorithm | SearchAlgorithm | TreeAlgorithm;
 export type AlgorithmEntry = Algorithm[];

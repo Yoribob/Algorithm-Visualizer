@@ -1,8 +1,13 @@
-import { generateArrayNumber } from "./generator";
+import { generateArrayNumber, generateBinaryTree } from "./generator";
 
 export function presetNumArray() {
   return generateArrayNumber(20, 100, 1);
 }
+
+export function presetBinaryTree() {
+  return generateBinaryTree(15, 100, 1);
+}
+
 export const TestArrRaw = [
   47, 83, 12, 65, 29, 91, 5, 58, 74, 36, 99, 21, 62, 8, 44, 77, 53, 16, 88, 31,
 ];

@@ -5,17 +5,23 @@ import { LeftSidebar } from "./LeftSidebar";
 import { RightSidebar } from "./RightSidebar";
 import { SortVisualizer } from "../visualizer/SortVisualizer";
 import { Controls } from "../visualizer/Controls";
+import { Tree as TreeVisualizer } from "../visualizer/Tree";
 import { StatusBar } from "./StatusBar";
 import * as comparators from "@/lib/utils/comparators";
 import type { SortOrder } from "@/lib/utils/comparators";
 import { getRanks } from "@/lib/utils/ranks";
-import { generateArrayNumber } from "@/lib/utils/generator";
+import { generateArrayNumber, generateBinaryTree } from "@/lib/utils/generator";
 import type { ArrayPreset } from "@/lib/utils/generator";
 import { useStepPlayer } from "@/hooks/useStepPlayer";
 import { useState } from "react";
-import type { Algorithm, CompareFn } from "@/lib/types/algorithm";
+import type {
+  Algorithm,
+  CompareFn,
+  TreeAlgorithm,
+} from "@/lib/types/algorithm";
 import type { CompareCategory } from "./CompareMode";
-import type { Step } from "@/lib/types/steps";
+import type { Step, TreeStep } from "@/lib/types/steps";
+import type { Tree, TreeNode } from "@/lib/types/tree";
 import * as config from "@/lib/config/config.json";
 
 function getAlgorithmSteps(
@@ -25,11 +31,37 @@ function getAlgorithmSteps(
   target: number,
   sortOrder: SortOrder,
 ): Step[] {
+  if (algorithm.category === "Tree") {
+    throw new Error("Tree algorithms must use the tree visualization panel.");
+  }
+
   if (algorithm.category === "Sort") {
     return algorithm.run(array, compareFn).steps;
   }
 
   return algorithm.run(array, target, sortOrder).steps;
+}
+
+function getDefaultTreeTarget(root: Tree): number {
+  if (!root) {
+    throw new Error("A tree is required to choose a default search target.");
+  }
+
+  const queue: TreeNode[] = [root.leftNode, root.rightNode].filter(
+    (node): node is TreeNode => node !== null,
+  );
+  let head = 0;
+
+  while (head < queue.length) {
+    const node = queue[head++];
+    if (node.value !== root.value) {
+      return node.value;
+    }
+    if (node.leftNode) queue.push(node.leftNode);
+    if (node.rightNode) queue.push(node.rightNode);
+  }
+
+  throw new Error("The generated tree has no non-root value to search for.");
 }
 
 interface AlgorithmPanelProps {
@@ -90,6 +122,73 @@ function AlgorithmPanel({
         showLogs={showLogs}
         onToggleLogs={onToggleLogs}
       />
+      <Controls
+        onNext={goNext}
+        onPrev={goPrev}
+        onAuto={goAuto}
+        onReset={goReset}
+        onSpeedChange={handleSpeedChange}
+        speed={playbackSpeed}
+        disableNext={step === steps.length - 1}
+        disablePrev={step === 0}
+        isAuto={isAuto}
+        steps={steps}
+        currentStepIndex={step}
+      />
+    </div>
+  );
+}
+
+interface TreeAlgorithmPanelProps {
+  algorithm: TreeAlgorithm;
+  root: Tree;
+  target: number;
+  showLogs: boolean;
+  onToggleLogs: () => void;
+}
+
+function TreeAlgorithmPanel({
+  algorithm,
+  root,
+  target,
+  showLogs,
+  onToggleLogs,
+}: TreeAlgorithmPanelProps) {
+  const steps: TreeStep[] = algorithm.run(root, target).steps;
+  const {
+    step,
+    isAuto,
+    playbackSpeed,
+    goNext,
+    goPrev,
+    goAuto,
+    goReset,
+    handleSpeedChange,
+  } = useStepPlayer(steps.length);
+  const currentStep = steps[step] ?? steps[0];
+
+  if (!currentStep) {
+    return null;
+  }
+
+  return (
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="flex min-h-0 max-h-200 flex-1 items-center justify-center overflow-hidden">
+        <TreeVisualizer
+          root={root}
+          step={currentStep}
+          playbackSpeed={playbackSpeed}
+        />
+      </div>
+      <hr className="h-px w-full shrink-0 self-center border-0 bg-bar" />
+      <div className="flex h-50 min-h-0 shrink-0 flex-col overflow-hidden">
+        <StatusBar
+          steps={steps}
+          currentStepIndex={step}
+          showLogs={showLogs}
+          onToggleLogs={onToggleLogs}
+        />
+      </div>
       <Controls
         onNext={goNext}
         onPrev={goPrev}
@@ -267,14 +366,21 @@ export function AppLayout() {
     sortOrder,
   );
   const array = generatedArray;
+  const tree = generateBinaryTree(sizeValue, rangeValue, seedValue);
   const middleIndex = Math.floor((array.length - 1) / 2);
   const defaultTarget = array[middleIndex] ?? 0;
+  const defaultTreeTarget = currentAlgorithm?.category === "Tree"
+    ? getDefaultTreeTarget(tree)
+    : 0;
   const numericTarget = target === null || target.trim() === ""
     ? Number.NaN
     : Number(target);
   const effectiveTarget = Number.isSafeInteger(numericTarget)
     ? numericTarget
     : defaultTarget;
+  const effectiveTreeTarget = Number.isSafeInteger(numericTarget)
+    ? numericTarget
+    : defaultTreeTarget;
   const selectedComparisonAlgorithms: [Algorithm, Algorithm] | null =
     compareAlgorithms[0] && compareAlgorithms[1]
       ? [compareAlgorithms[0], compareAlgorithms[1]]
@@ -306,6 +412,9 @@ export function AppLayout() {
   const selectAlgorithm = (algorithm: Algorithm) => {
     if (currentAlgorithm?.category === "Search" && algorithm.category === "Sort") {
       setSizeValue(config.defaults.size);
+    }
+    if (algorithm.category === "Tree" && currentAlgorithm?.category !== "Tree") {
+      setTarget(null);
     }
     setCurrentAlgorithm(algorithm);
   };
@@ -349,15 +458,26 @@ export function AppLayout() {
         </div>
       ) : currentAlgorithm ? (
         <div className="flex min-h-0 flex-1 justify-center">
-          <AlgorithmPanel
-            key={`${currentAlgorithm.slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
-            algorithm={currentAlgorithm}
-            array={array}
-            target={effectiveTarget}
-            sortOrder={sortOrder}
-            showLogs={showLogs}
-            onToggleLogs={() => setShowLogs((visible) => !visible)}
-          />
+          {currentAlgorithm.category === "Tree" ? (
+            <TreeAlgorithmPanel
+              key={`${currentAlgorithm.slug}-${effectiveTreeTarget}-${sizeValue}-${rangeValue}-${seedValue}`}
+              algorithm={currentAlgorithm}
+              root={tree}
+              target={effectiveTreeTarget}
+              showLogs={showLogs}
+              onToggleLogs={() => setShowLogs((visible) => !visible)}
+            />
+          ) : (
+            <AlgorithmPanel
+              key={`${currentAlgorithm.slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
+              algorithm={currentAlgorithm}
+              array={array}
+              target={effectiveTarget}
+              sortOrder={sortOrder}
+              showLogs={showLogs}
+              onToggleLogs={() => setShowLogs((visible) => !visible)}
+            />
+          )}
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center">
@@ -373,7 +493,11 @@ export function AppLayout() {
             ? selectedComparisonAlgorithms !== null
             : Boolean(currentAlgorithm)
         }
-        target={target ?? String(defaultTarget)}
+        target={
+          currentAlgorithm?.category === "Tree"
+            ? target ?? String(defaultTreeTarget)
+            : target ?? String(defaultTarget)
+        }
         setTarget={setTarget}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}

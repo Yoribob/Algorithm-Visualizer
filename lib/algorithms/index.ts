@@ -6,6 +6,7 @@ import { quickSortSimple } from "./array/quickSortSimple";
 import { linearSearch } from "./search/linearSearch";
 import { binarySearch } from "./search/binarySearch";
 import { jumpSearch } from "./search/jumpSearch";
+import { BFS } from "./tree/BFS";
 import type { AlgorithmEntry } from "@/lib/types/algorithm";
 
 export const algorithms: AlgorithmEntry = [
@@ -76,16 +77,16 @@ export const algorithms: AlgorithmEntry = [
     run: linearSearch,
   },
   {
-  name: "Binary Search",
-  slug: "binary-search",
-  category: "Search",
-  description:
-    "A divide-and-conquer search that repeatedly compares the target to the middle element of a sorted array and discards the half that cannot contain it, until the target is found or the range is empty. It requires sorted data.",
-  difficulty: "Easy",
-  timeComplexity: ["O(log n)", "O(log n)", "O(1)"],
-  spaceComplexity: "O(1)",
-  run: binarySearch,
-},
+    name: "Binary Search",
+    slug: "binary-search",
+    category: "Search",
+    description:
+      "A divide-and-conquer search that repeatedly compares the target to the middle element of a sorted array and discards the half that cannot contain it, until the target is found or the range is empty. It requires sorted data.",
+    difficulty: "Easy",
+    timeComplexity: ["O(log n)", "O(log n)", "O(1)"],
+    spaceComplexity: "O(1)",
+    run: binarySearch,
+  },
   {
     name: "Jump Search",
     slug: "jump-search",
@@ -96,5 +97,16 @@ export const algorithms: AlgorithmEntry = [
     timeComplexity: ["O(\sqrt{n})", "O(\sqrt{n})", "O(1)"],
     spaceComplexity: "O(1)",
     run: jumpSearch,
+  },
+  {
+    name: "Breadth-First Search",
+    slug: "bfs",
+    category: "Tree",
+    description:
+      "A tree traversal algorithm that visits nodes level by level, from the root downward, using a queue. Also known as level-order traversal.",
+    difficulty: "Easy",
+    timeComplexity: ["O(n)", "O(n)", "O(n)"],
+    spaceComplexity: "O(w)",
+    run: BFS,
   },
 ];

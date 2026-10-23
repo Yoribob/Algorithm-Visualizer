@@ -124,24 +124,28 @@ export function SidebarConfig({
     const targetValue = Number.isFinite(parsedTarget)
       ? Math.trunc(parsedTarget)
       : limits.range_min;
+    const targetMin = category === "Tree" ? 0 : limits.range_min;
+    const targetMax = category === "Tree" ? rangeValue - 1 : limits.range_max;
     setTarget(
-      String(clamp(targetValue, limits.range_min, limits.range_max)),
+      String(clamp(targetValue, targetMin, targetMax)),
     );
   };
 
   return (
     <section className="mt-auto space-y-4 rounded-lg border border-black/10 bg-main p-4">
-      <h3 className="text-base font-bold">Array settings</h3>
+      <h3 className="text-base font-bold">
+        {category === "Tree" ? "Tree settings" : "Array settings"}
+      </h3>
       <div className="space-y-3">
-        {category === "Search" && (
+        {(category === "Search" || category === "Tree") && (
           <label htmlFor="search-target" className="block">
             <span className="mb-1.5 block text-sm font-medium">Target</span>
             <input
               id="search-target"
               type="number"
               step={1}
-              min={limits.range_min}
-              max={limits.range_max}
+              min={category === "Tree" ? 0 : limits.range_min}
+              max={category === "Tree" ? rangeValue - 1 : limits.range_max}
               value={target ?? ""}
               onChange={(event) => setTarget(event.target.value)}
               onBlur={applyTarget}
@@ -155,7 +159,7 @@ export function SidebarConfig({
             />
           </label>
         )}
-        {!requiresSortedArray && (
+        {!requiresSortedArray && category !== "Tree" && (
           <label htmlFor="array-preset" className="block">
             <span className="mb-1.5 block text-sm font-medium">List preset</span>
             <select
