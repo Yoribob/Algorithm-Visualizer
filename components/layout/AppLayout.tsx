@@ -273,7 +273,7 @@ function ComparisonPanel({
     return (
       <section
         key={algorithm.slug}
-        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-3 pt-3"
+        className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden px-3 pt-3"
       >
         <div className="mb-2 flex items-center justify-between gap-2">
           <h2 className="truncate text-lg font-bold">{algorithm.name}</h2>
@@ -333,6 +333,109 @@ function ComparisonPanel({
   );
 }
 
+interface TreeComparisonPanelProps {
+  algorithms: [TreeAlgorithm, TreeAlgorithm];
+  root: Tree;
+  target: number;
+  showLogs: boolean;
+}
+
+function TreeComparisonPanel({
+  algorithms,
+  root,
+  target,
+  showLogs,
+}: TreeComparisonPanelProps) {
+  const [algorithmLogs, setAlgorithmLogs] = useState<[boolean, boolean]>([
+    showLogs,
+    showLogs,
+  ]);
+  const firstSteps = algorithms[0].run(root, target).steps;
+  const secondSteps = algorithms[1].run(root, target).steps;
+  const timelineLength = Math.max(firstSteps.length, secondSteps.length);
+  const {
+    step,
+    isAuto,
+    playbackSpeed,
+    goNext,
+    goPrev,
+    goAuto,
+    goReset,
+    handleSpeedChange,
+  } = useStepPlayer(timelineLength);
+
+  const renderAlgorithm = (
+    algorithm: TreeAlgorithm,
+    steps: TreeStep[],
+    algorithmIndex: 0 | 1,
+  ) => {
+    const algorithmStepIndex = Math.min(step, steps.length - 1);
+    const currentStep = steps[algorithmStepIndex] ?? steps[0];
+    if (!currentStep) {
+      return null;
+    }
+
+    return (
+      <section
+        key={algorithm.slug}
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden px-3 pt-3"
+      >
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h2 className="truncate text-lg font-bold">{algorithm.name}</h2>
+        </div>
+        <div className="flex min-h-0 w-full min-w-0 flex-1 overflow-hidden pb-2">
+          <TreeVisualizer
+            root={root}
+            step={currentStep}
+            playbackSpeed={playbackSpeed}
+          />
+        </div>
+        <hr className="h-px w-full shrink-0 border-0 bg-bar" />
+        <div className="h-[35%] min-h-0 shrink-0">
+          <StatusBar
+            steps={steps}
+            currentStepIndex={algorithmStepIndex}
+            showLogs={algorithmLogs[algorithmIndex]}
+            onToggleLogs={() =>
+              setAlgorithmLogs((currentLogs) => {
+                const nextLogs: [boolean, boolean] = [...currentLogs];
+                nextLogs[algorithmIndex] = !currentLogs[algorithmIndex];
+                return nextLogs;
+              })
+            }
+          />
+        </div>
+      </section>
+    );
+  };
+
+  return (
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 divide-x divide-black/10">
+        {renderAlgorithm(algorithms[0], firstSteps, 0)}
+        {renderAlgorithm(algorithms[1], secondSteps, 1)}
+      </div>
+      <Controls
+        onNext={goNext}
+        onPrev={goPrev}
+        onAuto={goAuto}
+        onReset={goReset}
+        onSpeedChange={handleSpeedChange}
+        speed={playbackSpeed}
+        disableNext={step === timelineLength - 1}
+        disablePrev={step === 0}
+        isAuto={isAuto}
+        steps={firstSteps}
+        currentStepIndex={Math.min(step, firstSteps.length - 1)}
+        secondStepCounter={{
+          currentStepIndex: Math.min(step, secondSteps.length - 1),
+          totalSteps: secondSteps.length,
+        }}
+      />
+    </div>
+  );
+}
+
 export function AppLayout() {
   const [currentAlgorithm, setCurrentAlgorithm] = useState<Algorithm | null>(
     null,
@@ -350,6 +453,9 @@ export function AppLayout() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("ascending");
   const [showLogs, setShowLogs] = useState(true);
   const [target, setTarget] = useState<string | null>(null);
+  const isTreeMode = isComparing
+    ? compareCategory === "Tree"
+    : currentAlgorithm?.category === "Tree";
   const requiresSortedArray = isComparing
     ? compareAlgorithms.some(
         (algorithm) =>
@@ -369,7 +475,7 @@ export function AppLayout() {
   const tree = generateBinaryTree(sizeValue, rangeValue, seedValue);
   const middleIndex = Math.floor((array.length - 1) / 2);
   const defaultTarget = array[middleIndex] ?? 0;
-  const defaultTreeTarget = currentAlgorithm?.category === "Tree"
+  const defaultTreeTarget = isTreeMode
     ? getDefaultTreeTarget(tree)
     : 0;
   const numericTarget = target === null || target.trim() === ""
@@ -385,6 +491,11 @@ export function AppLayout() {
     compareAlgorithms[0] && compareAlgorithms[1]
       ? [compareAlgorithms[0], compareAlgorithms[1]]
       : null;
+  const selectedTreeComparisonAlgorithms: [TreeAlgorithm, TreeAlgorithm] | null =
+    selectedComparisonAlgorithms?.[0].category === "Tree" &&
+    selectedComparisonAlgorithms[1].category === "Tree"
+      ? [selectedComparisonAlgorithms[0], selectedComparisonAlgorithms[1]]
+      : null;
 
   const toggleCompare = () => {
     if (isComparing) {
@@ -398,6 +509,9 @@ export function AppLayout() {
   };
 
   const selectCompareCategory = (category: CompareCategory | null) => {
+    if (category === "Tree") {
+      setTarget(null);
+    }
     if (
       category === "Sort" &&
       (compareCategory === "Search" ||
@@ -440,8 +554,16 @@ export function AppLayout() {
         onSelectCompareSecond={selectCompareSecond}
       />
       {isComparing ? (
-        <div className="flex min-h-0 flex-1 justify-center">
-          {selectedComparisonAlgorithms ? (
+        <div className="flex min-h-0 min-w-0 flex-1 justify-center overflow-hidden">
+          {selectedTreeComparisonAlgorithms ? (
+            <TreeComparisonPanel
+              key={`${selectedTreeComparisonAlgorithms[0].slug}-${selectedTreeComparisonAlgorithms[1].slug}-${effectiveTreeTarget}-${sizeValue}-${rangeValue}-${seedValue}`}
+              algorithms={selectedTreeComparisonAlgorithms}
+              root={tree}
+              target={effectiveTreeTarget}
+              showLogs={showLogs}
+            />
+          ) : selectedComparisonAlgorithms ? (
             <ComparisonPanel
               key={`${selectedComparisonAlgorithms[0].slug}-${selectedComparisonAlgorithms[1].slug}-${sortOrder}-${arrayPreset}-${sizeValue}-${rangeValue}-${seedValue}`}
               algorithms={selectedComparisonAlgorithms}
@@ -494,7 +616,7 @@ export function AppLayout() {
             : Boolean(currentAlgorithm)
         }
         target={
-          currentAlgorithm?.category === "Tree"
+          isTreeMode
             ? target ?? String(defaultTreeTarget)
             : target ?? String(defaultTarget)
         }

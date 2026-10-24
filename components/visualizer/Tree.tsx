@@ -2,6 +2,7 @@ import type { Tree, TreeNode } from "@/lib/types/tree";
 import type { TreeStep } from "@/lib/types/steps";
 import { Node } from "@/components/visualizer/Node";
 import * as config from "@/lib/config/config.json";
+import { useEffect, useRef, useState } from "react";
 
 type TreeProps = {
   root: Tree;
@@ -12,27 +13,64 @@ type TreeProps = {
 const CHILD_GAP = 16;
 const CONNECTOR_HEIGHT = 24;
 const NODE_DIAMETER = 48;
+const TREE_PADDING = 32;
 
-function measureTree(node: TreeNode, widths: Map<TreeNode, number>): number {
-  const leftWidth = node.leftNode ? measureTree(node.leftNode, widths) : 0;
-  const rightWidth = node.rightNode ? measureTree(node.rightNode, widths) : 0;
+function measureTree(
+  node: TreeNode,
+  widths: Map<TreeNode, number>,
+): { width: number; depth: number } {
+  const left = node.leftNode ? measureTree(node.leftNode, widths) : null;
+  const right = node.rightNode ? measureTree(node.rightNode, widths) : null;
+  const leftSize = left?.width ?? 0;
+  const rightSize = right?.width ?? 0;
   const width =
-    leftWidth && rightWidth
-      ? leftWidth + CHILD_GAP + rightWidth
-      : leftWidth || rightWidth
-        ? (leftWidth || rightWidth) + config.sizes.node_width
-      : Math.max(config.sizes.node_width, leftWidth, rightWidth);
+    leftSize && rightSize
+      ? leftSize + CHILD_GAP + rightSize
+      : leftSize || rightSize
+        ? (leftSize || rightSize) + config.sizes.node_width
+        : config.sizes.node_width;
   widths.set(node, width);
-  return width;
+  return {
+    width,
+    depth: 1 + Math.max(left?.depth ?? 0, right?.depth ?? 0),
+  };
 }
 
 export function Tree({ root, playbackSpeed, step }: TreeProps) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      setViewportSize({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
+    });
+    observer.observe(viewport);
+
+    return () => observer.disconnect();
+  }, []);
+
   if (!root) {
     return <p className="text-center text-gray-500">No tree to display.</p>;
   }
 
   const widths = new Map<TreeNode, number>();
-  const treeWidth = measureTree(root, widths);
+  const { width: treeWidth, depth: treeDepth } = measureTree(root, widths);
+  const contentWidth = treeWidth + TREE_PADDING * 2;
+  const contentHeight =
+    treeDepth * NODE_DIAMETER +
+    (treeDepth - 1) * CONNECTOR_HEIGHT +
+    TREE_PADDING * 2;
+  const scale = Math.min(
+    1,
+    viewportSize.width > 0 ? viewportSize.width / contentWidth : 1,
+    viewportSize.height > 0 ? viewportSize.height / contentHeight : 1,
+  );
   const visitedIds = new Set(step?.visitedIds);
   const queueIds = new Set(step?.queueIds);
 
@@ -107,12 +145,29 @@ export function Tree({ root, playbackSpeed, step }: TreeProps) {
   }
 
   return (
-    <div className="h-full min-h-0 w-full min-w-0 overflow-auto">
+    <div
+      ref={viewportRef}
+      className="flex h-full min-h-0 w-full min-w-0 max-w-full items-center justify-center overflow-hidden"
+    >
       <div
-        className="mx-auto min-h-full w-max px-8 py-8"
-        style={{ minWidth: treeWidth }}
+        className="relative shrink-0"
+        style={{
+          width: contentWidth * scale,
+          height: contentHeight * scale,
+        }}
       >
-        {renderNode(root)}
+        <div
+          className="absolute left-0 top-0"
+          style={{
+            width: contentWidth,
+            height: contentHeight,
+            padding: TREE_PADDING,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {renderNode(root)}
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { linearSearch } from "./search/linearSearch";
 import { binarySearch } from "./search/binarySearch";
 import { jumpSearch } from "./search/jumpSearch";
 import { BFS } from "./tree/BFS";
+import { DFS } from "./tree/DFS";
 import type { AlgorithmEntry } from "@/lib/types/algorithm";
 
 export const algorithms: AlgorithmEntry = [
@@ -108,5 +109,16 @@ export const algorithms: AlgorithmEntry = [
     timeComplexity: ["O(n)", "O(n)", "O(n)"],
     spaceComplexity: "O(w)",
     run: BFS,
+  },
+  {
+    name: "Depth-First Search",
+    slug: "dfs",
+    category: "Tree",
+    description:
+      "A tree traversal algorithm that explores a branch as far as possible before backtracking, using a stack. This implementation visits left children before right children.",
+    difficulty: "Easy",
+    timeComplexity: ["O(n)", "O(n)", "O(n)"],
+    spaceComplexity: "O(h)",
+    run: DFS,
   },
 ];

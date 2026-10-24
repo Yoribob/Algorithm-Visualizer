@@ -1,6 +1,6 @@
 import type { Algorithm, AlgorithmEntry } from "@/lib/types/algorithm";
 
-export type CompareCategory = "Sort" | "Search";
+export type CompareCategory = "Sort" | "Search" | "Tree";
 
 interface CompareModeProps {
   algorithms: AlgorithmEntry;
@@ -44,13 +44,18 @@ export function CompareMode({
           value={category ?? ""}
           onChange={(event) => {
             const value = event.target.value;
-            onSelectCategory(value === "Sort" || value === "Search" ? value : null);
+            onSelectCategory(
+              value === "Sort" || value === "Search" || value === "Tree"
+                ? value
+                : null,
+            );
           }}
           className="w-full rounded-md border border-black/15 bg-white px-2 py-2 text-sm outline-none focus:border-bar focus:ring-2 focus:ring-bar/15"
         >
           <option value="">Select a category</option>
           <option value="Sort">Array</option>
           <option value="Search">Search</option>
+          <option value="Tree">Tree</option>
         </select>
       </label>
 
